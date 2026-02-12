@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     // Image picker
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            imageDisplay.setImageURI(it)
+            loadImageFromUri(it)
             tapHint.visibility = View.GONE
             imageLoaded = true
             imageDisplay.setOnClickListener(null)
@@ -91,6 +91,44 @@ class MainActivity : AppCompatActivity() {
             histogramView.sourceImageView = imageDisplay
             applyDisplayAdjustments()
             refreshOverlays()
+        }
+    }
+
+    private fun loadImageFromUri(uri: Uri) {
+        try {
+            val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+
+            val imgWidth = options.outWidth
+            val imgHeight = options.outHeight
+            if (imgWidth <= 0 || imgHeight <= 0) {
+                imageDisplay.setImageURI(uri)
+                return
+            }
+
+            val maxDim = 2048
+            var inSampleSize = 1
+            if (imgWidth > maxDim || imgHeight > maxDim) {
+                val halfW = imgWidth / 2
+                val halfH = imgHeight / 2
+                while (halfW / inSampleSize >= maxDim && halfH / inSampleSize >= maxDim) {
+                    inSampleSize *= 2
+                }
+            }
+
+            val decodeOptions = BitmapFactory.Options().apply {
+                this.inSampleSize = inSampleSize
+            }
+            val bitmap = contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it, null, decodeOptions)
+            }
+            if (bitmap != null) {
+                imageDisplay.setImageBitmap(bitmap)
+            } else {
+                imageDisplay.setImageURI(uri)
+            }
+        } catch (_: Exception) {
+            imageDisplay.setImageURI(uri)
         }
     }
 
