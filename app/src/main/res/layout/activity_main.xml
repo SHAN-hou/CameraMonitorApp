@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".MainActivity">
+
+    <!-- Left Side Menu -->
+    <LinearLayout
+        android:id="@+id/leftMenu"
+        android:layout_width="60dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:background="@color/menu_bg"
+        android:gravity="top|center_horizontal"
+        android:paddingTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomToolbar">
+
+        <TextView
+            android:id="@+id/btnMenuDisplay"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="@string/menu_display"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="@drawable/menu_item_bg"
+            android:layout_marginBottom="4dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btnMenuFunction"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="@string/menu_function"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="@drawable/menu_item_bg"
+            android:layout_marginBottom="4dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btnMenuSettings"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="@string/menu_settings"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="@drawable/menu_item_bg"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Sub Menu Panel (floating) -->
+    <LinearLayout
+        android:id="@+id/subMenuPanel"
+        android:layout_width="200dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:background="@color/toolbar_bg"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:elevation="8dp"
+        app:layout_constraintStart_toEndOf="@id/leftMenu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomToolbar">
+
+        <TextView
+            android:id="@+id/subMenuTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/accent_blue"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/subMenuList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Center Display Area -->
+    <FrameLayout
+        android:id="@+id/displayArea"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/dark_bg"
+        app:layout_constraintStart_toEndOf="@id/leftMenu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomToolbar">
+
+        <!-- Image display (test pattern / user image) -->
+        <ImageView
+            android:id="@+id/imageDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:contentDescription="Display" />
+
+        <!-- Aspect Ratio Frame Overlay -->
+        <com.tianshuo.cameramonitor.view.AspectRatioOverlayView
+            android:id="@+id/aspectRatioOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Zebra Pattern Overlay -->
+        <com.tianshuo.cameramonitor.view.ZebraOverlayView
+            android:id="@+id/zebraOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Grid Overlay -->
+        <com.tianshuo.cameramonitor.view.GridOverlayView
+            android:id="@+id/gridOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Center Marker Overlay -->
+        <com.tianshuo.cameramonitor.view.CenterMarkerView
+            android:id="@+id/centerMarker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Safe Area Overlay -->
+        <com.tianshuo.cameramonitor.view.SafeAreaOverlayView
+            android:id="@+id/safeAreaOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Focus Peaking Overlay -->
+        <com.tianshuo.cameramonitor.view.FocusPeakingView
+            android:id="@+id/focusPeaking"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Histogram Overlay -->
+        <com.tianshuo.cameramonitor.view.HistogramView
+            android:id="@+id/histogramView"
+            android:layout_width="200dp"
+            android:layout_height="120dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:visibility="gone" />
+
+        <!-- Tap hint -->
+        <TextView
+            android:id="@+id/tapHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/tap_to_load_image"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp" />
+    </FrameLayout>
+
+    <!-- Bottom Toolbar -->
+    <LinearLayout
+        android:id="@+id/bottomToolbar"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@color/toolbar_bg"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Shortcut 1: Aspect Ratio Frame -->
+        <LinearLayout
+            android:id="@+id/btnFrame"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/toolbar_item_bg"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/btnFrameIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⬜"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/btnFrameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/shortcut_frame"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:background="@color/divider" />
+
+        <!-- Shortcut 2: Monochrome -->
+        <LinearLayout
+            android:id="@+id/btnMono"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/toolbar_item_bg"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/btnMonoIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎨"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/btnMonoLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/shortcut_mono"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:background="@color/divider" />
+
+        <!-- Shortcut 3: Zebra -->
+        <LinearLayout
+            android:id="@+id/btnZebra"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/toolbar_item_bg"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/btnZebraIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📊"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/btnZebraLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/shortcut_zebra"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Popup menus for bottom shortcuts -->
+    <LinearLayout
+        android:id="@+id/popupFrame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/popup_bg"
+        android:padding="8dp"
+        android:elevation="12dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottomToolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="4dp">
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

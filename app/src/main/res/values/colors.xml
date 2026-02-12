@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="dark_bg">#FF1A1A1A</color>
+    <color name="menu_bg">#FF2A2A2A</color>
+    <color name="menu_selected">#FF3A3A3A</color>
+    <color name="accent_blue">#FF4FC3F7</color>
+    <color name="accent_green">#FF66BB6A</color>
+    <color name="accent_red">#FFEF5350</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#FFB0B0B0</color>
+    <color name="toolbar_bg">#FF222222</color>
+    <color name="toolbar_active">#FF4FC3F7</color>
+    <color name="divider">#FF3A3A3A</color>
+    <color name="overlay_frame">#CCFFFFFF</color>
+    <color name="zebra_stripe">#AAFF0000</color>
+    <color name="mono_red">#FFFF0000</color>
+    <color name="mono_green">#FF00FF00</color>
+    <color name="mono_blue">#FF0000FF</color>
+</resources>

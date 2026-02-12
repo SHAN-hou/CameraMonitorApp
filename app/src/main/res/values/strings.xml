@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Camera Monitor</string>
+    <string name="menu_display">显示</string>
+    <string name="menu_function">功能</string>
+    <string name="menu_settings">设置</string>
+    <string name="shortcut_frame">画幅框</string>
+    <string name="shortcut_mono">单色</string>
+    <string name="shortcut_zebra">斑马纹</string>
+    <string name="ratio_16_9">16:9</string>
+    <string name="ratio_4_3">4:3</string>
+    <string name="ratio_185_1">1.85:1</string>
+    <string name="ratio_235_1">2.35:1</string>
+    <string name="mono_off">关闭</string>
+    <string name="mono_red">红色</string>
+    <string name="mono_green">绿色</string>
+    <string name="mono_blue">蓝色</string>
+    <string name="zebra_off">关闭</string>
+    <string name="zebra_80">80 IRE</string>
+    <string name="zebra_100">100 IRE</string>
+    <string name="display_brightness">亮度</string>
+    <string name="display_contrast">对比度</string>
+    <string name="display_saturation">饱和度</string>
+    <string name="display_volume">音量</string>
+    <string name="func_focus_assist">对焦辅助</string>
+    <string name="func_histogram">直方图</string>
+    <string name="func_grid">网格线</string>
+    <string name="func_center_marker">中心标记</string>
+    <string name="func_safe_area">安全区</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_resolution">分辨率</string>
+    <string name="settings_about">关于</string>
+    <string name="settings_reset">恢复默认</string>
+    <string name="tap_to_load_image">点击加载图片</string>
+</resources>

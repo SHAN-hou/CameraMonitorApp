@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Camera monitor icon -->
+    <path
+        android:fillColor="#FF4FC3F7"
+        android:pathData="M30,35 L78,35 C80,35 82,37 82,39 L82,69 C82,71 80,73 78,73 L30,73 C28,73 26,71 26,69 L26,39 C26,37 28,35 30,35 Z" />
+    <path
+        android:fillColor="#FF1A1A1A"
+        android:pathData="M33,39 L75,39 C76,39 77,40 77,41 L77,67 C77,68 76,69 75,69 L33,69 C32,69 31,68 31,67 L31,41 C31,40 32,39 33,39 Z" />
+    <path
+        android:fillColor="#FF4FC3F7"
+        android:pathData="M50,50 L58,54 L50,58 Z" />
+</vector>
