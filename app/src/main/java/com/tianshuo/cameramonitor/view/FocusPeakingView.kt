@@ -13,7 +13,7 @@ class FocusPeakingView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    var enabled: Boolean = false
+    var peakingEnabled: Boolean = false
         set(value) {
             field = value
             invalidate()
@@ -29,7 +29,7 @@ class FocusPeakingView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (!enabled) return
+        if (!peakingEnabled) return
 
         val imgView = sourceImageView ?: return
         val drawable = imgView.drawable ?: return

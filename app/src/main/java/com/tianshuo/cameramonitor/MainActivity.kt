@@ -241,8 +241,8 @@ class MainActivity : AppCompatActivity() {
     private fun showFunctionMenu() {
         subMenuTitle.text = "功能设置"
         val items = listOf(
-            SubMenuItem("对焦辅助", if (focusPeaking.enabled) "已开启" else "已关闭") {
-                focusPeaking.enabled = !focusPeaking.enabled
+            SubMenuItem("对焦辅助", if (focusPeaking.peakingEnabled) "已开启" else "已关闭") {
+                focusPeaking.peakingEnabled = !focusPeaking.peakingEnabled
                 showFunctionMenu()
             },
             SubMenuItem("直方图", if (histogramView.visibility == View.VISIBLE) "已开启" else "已关闭") {
@@ -432,7 +432,7 @@ class MainActivity : AppCompatActivity() {
         gridOverlay.gridType = currentGridType
         centerMarker.showMarker = false
         safeAreaOverlay.showSafeArea = false
-        focusPeaking.enabled = false
+        focusPeaking.peakingEnabled = false
         histogramView.visibility = View.GONE
 
         btnFrameLabel.text = "画幅框"
