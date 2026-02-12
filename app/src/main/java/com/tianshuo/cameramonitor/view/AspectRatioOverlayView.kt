@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import android.widget.ImageView
 
 class AspectRatioOverlayView @JvmOverloads constructor(
     context: Context,
@@ -20,6 +22,8 @@ class AspectRatioOverlayView @JvmOverloads constructor(
         RATIO_185_1("1.85:1", 1.85f, 1f),
         RATIO_235_1("2.35:1", 2.35f, 1f)
     }
+
+    var sourceImageView: ImageView? = null
 
     private val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -45,30 +49,43 @@ class AspectRatioOverlayView @JvmOverloads constructor(
             invalidate()
         }
 
+    private fun getImageBounds(): RectF {
+        val iv = sourceImageView
+        return if (iv != null) {
+            ImageBoundsHelper.getImageBounds(iv)
+        } else {
+            RectF(0f, 0f, width.toFloat(), height.toFloat())
+        }
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (currentRatio == AspectRatio.NONE) return
 
-        val viewWidth = width.toFloat()
-        val viewHeight = height.toFloat()
+        val imgBounds = getImageBounds()
+        val imgWidth = imgBounds.width()
+        val imgHeight = imgBounds.height()
         val targetRatio = currentRatio.widthRatio / currentRatio.heightRatio
-        val viewRatio = viewWidth / viewHeight
+        val imgRatio = imgWidth / imgHeight
 
         val frameWidth: Float
         val frameHeight: Float
 
-        if (targetRatio > viewRatio) {
-            frameWidth = viewWidth
-            frameHeight = viewWidth / targetRatio
+        if (targetRatio > imgRatio) {
+            frameWidth = imgWidth
+            frameHeight = imgWidth / targetRatio
         } else {
-            frameHeight = viewHeight
-            frameWidth = viewHeight * targetRatio
+            frameHeight = imgHeight
+            frameWidth = imgHeight * targetRatio
         }
 
-        val left = (viewWidth - frameWidth) / 2f
-        val top = (viewHeight - frameHeight) / 2f
+        val left = imgBounds.left + (imgWidth - frameWidth) / 2f
+        val top = imgBounds.top + (imgHeight - frameHeight) / 2f
         val right = left + frameWidth
         val bottom = top + frameHeight
+
+        val viewWidth = width.toFloat()
+        val viewHeight = height.toFloat()
 
         // Draw mask (semi-transparent black outside the frame)
         canvas.drawRect(0f, 0f, viewWidth, top, maskPaint)

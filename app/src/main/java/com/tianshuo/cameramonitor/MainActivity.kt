@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.media.AudioManager
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -52,6 +53,14 @@ class MainActivity : AppCompatActivity() {
     private var currentZebraMode: ZebraOverlayView.ZebraMode = ZebraOverlayView.ZebraMode.OFF
     private var currentGridType: GridOverlayView.GridType = GridOverlayView.GridType.NONE
     private var activeMenu: String? = null
+    private var imageLoaded: Boolean = false
+
+    // Display adjustment values (0-100, 50 = default)
+    private var brightnessValue: Int = 50
+    private var contrastValue: Int = 50
+    private var saturationValue: Int = 50
+    private var colorTempValue: Int = 50
+    private var volumeValue: Int = 50
 
     // Monochrome filter
     private var monoColorFilter: ColorMatrixColorFilter? = null
@@ -68,9 +77,19 @@ class MainActivity : AppCompatActivity() {
         uri?.let {
             imageDisplay.setImageURI(it)
             tapHint.visibility = View.GONE
+            imageLoaded = true
+            imageDisplay.setOnClickListener(null)
+            imageDisplay.isClickable = false
+            tapHint.setOnClickListener(null)
+            tapHint.isClickable = false
+            aspectRatioOverlay.sourceImageView = imageDisplay
             zebraOverlay.sourceImageView = imageDisplay
+            gridOverlay.sourceImageView = imageDisplay
+            centerMarker.sourceImageView = imageDisplay
+            safeAreaOverlay.sourceImageView = imageDisplay
             focusPeaking.sourceImageView = imageDisplay
             histogramView.sourceImageView = imageDisplay
+            applyDisplayAdjustments()
             refreshOverlays()
         }
     }
@@ -189,7 +208,11 @@ class MainActivity : AppCompatActivity() {
         imageDisplay.setImageBitmap(bitmap)
         tapHint.visibility = View.VISIBLE
 
+        aspectRatioOverlay.sourceImageView = imageDisplay
         zebraOverlay.sourceImageView = imageDisplay
+        gridOverlay.sourceImageView = imageDisplay
+        centerMarker.sourceImageView = imageDisplay
+        safeAreaOverlay.sourceImageView = imageDisplay
         focusPeaking.sourceImageView = imageDisplay
         histogramView.sourceImageView = imageDisplay
     }
@@ -228,14 +251,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun showDisplayMenu() {
         subMenuTitle.text = "显示设置"
-        val items = listOf(
-            SubMenuItem("亮度", "调节画面亮度") { showSliderDialog("亮度", 0, 100, 50) },
-            SubMenuItem("对比度", "调节画面对比度") { showSliderDialog("对比度", 0, 100, 50) },
-            SubMenuItem("饱和度", "调节画面饱和度") { showSliderDialog("饱和度", 0, 100, 50) },
-            SubMenuItem("色温", "调节画面色温") { showSliderDialog("色温", 3200, 6500, 5600) },
-            SubMenuItem("音量", "调节音量") { showSliderDialog("音量", 0, 100, 50) }
+        val sliderItems = listOf(
+            SliderItem("亮度", 0, 100, brightnessValue) { value ->
+                brightnessValue = value
+                applyDisplayAdjustments()
+            },
+            SliderItem("对比度", 0, 100, contrastValue) { value ->
+                contrastValue = value
+                applyDisplayAdjustments()
+            },
+            SliderItem("饱和度", 0, 100, saturationValue) { value ->
+                saturationValue = value
+                applyDisplayAdjustments()
+            },
+            SliderItem("色温", 0, 100, colorTempValue) { value ->
+                colorTempValue = value
+                applyDisplayAdjustments()
+            },
+            SliderItem("音量", 0, 100, volumeValue) { value ->
+                volumeValue = value
+                applyVolumeAdjustment()
+            }
         )
-        subMenuList.adapter = SubMenuAdapter(items)
+        subMenuList.adapter = SliderMenuAdapter(sliderItems)
     }
 
     private fun showFunctionMenu() {
@@ -292,8 +330,62 @@ class MainActivity : AppCompatActivity() {
         gridOverlay.gridType = currentGridType
     }
 
-    private fun showSliderDialog(title: String, min: Int, max: Int, defaultVal: Int) {
-        Toast.makeText(this, "$title: $defaultVal", Toast.LENGTH_SHORT).show()
+    private fun applyDisplayAdjustments() {
+        if (currentMonoMode != MonoMode.OFF) {
+            applyMonoMode()
+            return
+        }
+
+        val brightnessFactor = (brightnessValue - 50) * 2.55f
+        val contrastFactor = if (contrastValue <= 50) {
+            contrastValue / 50f
+        } else {
+            1f + (contrastValue - 50) / 25f
+        }
+        val satFactor = saturationValue / 50f
+        val tempOffset = (colorTempValue - 50) * 1.5f
+
+        val brightnessCM = ColorMatrix(floatArrayOf(
+            1f, 0f, 0f, 0f, brightnessFactor,
+            0f, 1f, 0f, 0f, brightnessFactor,
+            0f, 0f, 1f, 0f, brightnessFactor,
+            0f, 0f, 0f, 1f, 0f
+        ))
+
+        val contrastTranslate = (1f - contrastFactor) * 128f
+        val contrastCM = ColorMatrix(floatArrayOf(
+            contrastFactor, 0f, 0f, 0f, contrastTranslate,
+            0f, contrastFactor, 0f, 0f, contrastTranslate,
+            0f, 0f, contrastFactor, 0f, contrastTranslate,
+            0f, 0f, 0f, 1f, 0f
+        ))
+
+        val saturationCM = ColorMatrix()
+        saturationCM.setSaturation(satFactor)
+
+        val colorTempCM = ColorMatrix(floatArrayOf(
+            1f, 0f, 0f, 0f, tempOffset,
+            0f, 1f, 0f, 0f, 0f,
+            0f, 0f, 1f, 0f, -tempOffset,
+            0f, 0f, 0f, 1f, 0f
+        ))
+
+        val combined = ColorMatrix()
+        combined.postConcat(brightnessCM)
+        combined.postConcat(contrastCM)
+        combined.postConcat(saturationCM)
+        combined.postConcat(colorTempCM)
+
+        imageDisplay.colorFilter = ColorMatrixColorFilter(combined)
+    }
+
+    private fun applyVolumeAdjustment() {
+        try {
+            val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+            val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val targetVol = (volumeValue * maxVol / 100).coerceIn(0, maxVol)
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetVol, 0)
+        } catch (_: Exception) { }
     }
 
     private fun setupBottomToolbar() {
@@ -339,7 +431,8 @@ class MainActivity : AppCompatActivity() {
     private fun applyMonoMode() {
         when (currentMonoMode) {
             MonoMode.OFF -> {
-                imageDisplay.colorFilter = null
+                applyDisplayAdjustments()
+                return
             }
             MonoMode.RED -> {
                 val cm = ColorMatrix(floatArrayOf(
@@ -426,6 +519,12 @@ class MainActivity : AppCompatActivity() {
         currentZebraMode = ZebraOverlayView.ZebraMode.OFF
         currentGridType = GridOverlayView.GridType.NONE
 
+        brightnessValue = 50
+        contrastValue = 50
+        saturationValue = 50
+        colorTempValue = 50
+        volumeValue = 50
+
         aspectRatioOverlay.currentRatio = currentFrameRatio
         imageDisplay.colorFilter = null
         zebraOverlay.mode = currentZebraMode
@@ -443,7 +542,9 @@ class MainActivity : AppCompatActivity() {
         updateToolbarActiveState(btnMonoLabel, false)
         updateToolbarActiveState(btnZebraLabel, false)
 
+        imageLoaded = false
         setupTestPattern()
+        setupDisplayAreaClick()
         Toast.makeText(this, "已恢复默认设置", Toast.LENGTH_SHORT).show()
     }
 
@@ -461,6 +562,15 @@ class MainActivity : AppCompatActivity() {
         val title: String,
         val subtitle: String,
         val onClick: () -> Unit
+    )
+
+    // Slider item data class
+    data class SliderItem(
+        val title: String,
+        val min: Int,
+        val max: Int,
+        val currentValue: Int,
+        val onValueChanged: (Int) -> Unit
     )
 
     // Sub menu adapter
@@ -488,6 +598,43 @@ class MainActivity : AppCompatActivity() {
             holder.subtitle.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.text_secondary))
             holder.subtitle.textSize = 11f
             holder.itemView.setOnClickListener { item.onClick() }
+        }
+
+        override fun getItemCount() = items.size
+    }
+
+    // Slider menu adapter for display settings
+    inner class SliderMenuAdapter(private val items: List<SliderItem>) :
+        RecyclerView.Adapter<SliderMenuAdapter.ViewHolder>() {
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val title: TextView = view.findViewById(R.id.sliderTitle)
+            val value: TextView = view.findViewById(R.id.sliderValue)
+            val seekBar: SeekBar = view.findViewById(R.id.sliderSeekBar)
+        }
+
+        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
+            val view = layoutInflater.inflate(R.layout.item_slider, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = items[position]
+            holder.title.text = item.title
+            holder.value.text = "${item.currentValue}"
+            holder.seekBar.max = item.max - item.min
+            holder.seekBar.progress = item.currentValue - item.min
+            holder.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    if (fromUser) {
+                        val actualValue = progress + item.min
+                        holder.value.text = "$actualValue"
+                        item.onValueChanged(actualValue)
+                    }
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
         }
 
         override fun getItemCount() = items.size

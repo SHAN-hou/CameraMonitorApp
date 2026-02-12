@@ -5,14 +5,18 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import android.widget.ImageView
 
 class SafeAreaOverlayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
+
+    var sourceImageView: ImageView? = null
 
     var showSafeArea: Boolean = false
         set(value) {
@@ -42,33 +46,43 @@ class SafeAreaOverlayView @JvmOverloads constructor(
         alpha = 160
     }
 
+    private fun getImageBounds(): RectF {
+        val iv = sourceImageView
+        return if (iv != null) {
+            ImageBoundsHelper.getImageBounds(iv)
+        } else {
+            RectF(0f, 0f, width.toFloat(), height.toFloat())
+        }
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (!showSafeArea) return
 
-        val w = width.toFloat()
-        val h = height.toFloat()
+        val b = getImageBounds()
+        val w = b.width()
+        val h = b.height()
 
         // Action safe area (90%)
         val actionMarginX = w * 0.05f
         val actionMarginY = h * 0.05f
         canvas.drawRect(
-            actionMarginX, actionMarginY,
-            w - actionMarginX, h - actionMarginY,
+            b.left + actionMarginX, b.top + actionMarginY,
+            b.right - actionMarginX, b.bottom - actionMarginY,
             safeActionPaint
         )
-        canvas.drawText("Action Safe 90%", actionMarginX + 4f, actionMarginY + 16f, labelPaint)
+        canvas.drawText("Action Safe 90%", b.left + actionMarginX + 4f, b.top + actionMarginY + 16f, labelPaint)
 
         // Title safe area (80%)
         val titleMarginX = w * 0.1f
         val titleMarginY = h * 0.1f
         canvas.drawRect(
-            titleMarginX, titleMarginY,
-            w - titleMarginX, h - titleMarginY,
+            b.left + titleMarginX, b.top + titleMarginY,
+            b.right - titleMarginX, b.bottom - titleMarginY,
             safeTitlePaint
         )
         labelPaint.color = Color.YELLOW
-        canvas.drawText("Title Safe 80%", titleMarginX + 4f, titleMarginY + 16f, labelPaint)
+        canvas.drawText("Title Safe 80%", b.left + titleMarginX + 4f, b.top + titleMarginY + 16f, labelPaint)
         labelPaint.color = Color.GREEN
     }
 }
